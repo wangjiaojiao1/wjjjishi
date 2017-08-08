@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="jquery-1.11.3.min.js"></script>
+		<style>
+			#header{
+				background-color:green;
+				color:yellow;
+				width:700px;
+				height:100px;
+				text-align:center;
+				line-height:100px;
+			}
+			#left{
+				float:left;
+				width:200px;
+				height:500px;
+				background-color:green;
+			}
+			#left ul{
+				margin:0 auto;
+				list-style:none;
+				width:150px;
+				height:200px;
+				background-color:white;
+				padding-left:0px;
+				margin-bottom:20px;
+			}
+			#left ul span{
+				display:block;
+				width:150px;
+				height:50px;
+				text-align:center;
+				line-height:50px;
+				background-color:blue;
+			}
+			a{
+				text-decoration:none;
+			}
+			#main1,#main2,#main3,#main4,#main5,#main6{
+				float:left;
+				width:550px;
+				height:500px;
+				margin:0 auto;
+				display:none;
+			}	
+		</style>
+	</head>
+	<body>
+		<div id="header">
+			<h1>简洁记事本</h1>
+		</div>
+		<div id="container">
+			<div id="left">
+				<ul><span>用户管理</span>
+					<li><a href="#" onclick="show(0)">密码修改</a></li>
+					<li><a href="#" onclick="show(1)">上传头像</a></li>
+				</ul>
+				<ul><span>留言管理</span>
+					<li><a href="#" onclick="show(2)">发表留言</a></li>
+					<li><a href="#" onclick="show(3)">删除留言</a></li>
+					<li><a href="#" onclick="show(4)">修改留言</a></li>
+					<li><a href="#" onclick="show(5)">查看留言</a></li>
+				</ul>
+				
+			</div>
+			<div id="main1">
+				<p>当前用户：admin</p>
+				<p>原密码：<input type="password" id="old"/></p>
+				<p>新密码: <input type="password" id="new"/></p>
+				<p><button id="ok">确认</button></p>
+			</div>
+			<div id="main2">
+				<p><input type="file" id="tou"/></p>
+				<p><button id="head">上传头像</button></p>
+			</div>
+			<div id="main3">
+				<p>题目：<input type="text" id="title"/></p>
+				<p>内容：<textarea cols=60 rows=20 id="content"></textarea></p>
+				<p><button id="fabiao">发表</button></p>
+			</div>
+			<div id="main4">
+				<table border=1>
+					<th>
+						
+					</th>
+						
+				</table>
+			</div>
+			<div id="main5">
+				<table border=1>
+					<th>
+					</th>
+						
+				</table>
+			</div>
+			<div id="main6">
+				<table border=1>
+					
+						
+				</table>
+			</div>
+			<div id="error">
+			</div>
+		</div>
+		<script>
+			arr=["#main1","#main2","#main3","#main4","#main5","#main6"];
+			function show(id){
+				
+				$.each(arr,function(index,obj){
+					
+					$(obj).css('display','none');
+				});
+				$(arr[id]).css('display','block');
+				showall();
+					
+			}
+			function showall(){
+				$("table").html("");
+				$("table").append("<th><td>题目</td><td>用户名</td><td>头像</td><td>内容</td></th>");
+				$.ajax({
+					url:'showall.php',
+					type:'post',
+					dataType:'json',
+					success:function(data){		
+						$.each(data,function(index,obj){
+							$("table").append("<tr><td></td><td>"+obj.title+"</td><td>"+obj.user+"</td><td><img src='"+obj.touxiang+"' style='width:50px;height:50px;' /></td><td>"+obj.content+"</td><td><button class='btn'>删除</td></tr>");
+						})
+						$.each($(".btn"),function(index,obj){
+								console.log(obj);
+								$(obj).click(function(){
+									$.ajax({
+										url:'delete.php',
+										type:'post',
+										data:{"title":data[index].title},
+										dataType:'html',
+										success:function(data){
+											alert(data);
+											showall();
+										},
+									error:function(){
+									}
+				});
+								});
+						});
+					
+					},
+					error:function(){
+					}
+					
+				});
+				
+			}
+			$("#ok").click(function(){
+				$.ajax({
+					url:'change.php',
+					type:'post',
+					data:{"username":"admin","password":$("#new").val()},
+					dataType:'text',
+					success:function(data){		
+						alert(data);
+						$("#old").val("");
+						$("#new").val("");
+					},
+					error:function(){
+					}
+					
+				});
+			});
+			$("#head").click(function(){
+				var fd=new FormData();
+				fd.append('upload',1);
+				fd.append('upfile',$("#tou").get(0).files[0]);
+				$.ajax({
+					url:'upload.php',
+					type:'post',
+					data:fd,
+					processData:false,
+					contentType:false,
+					dataType:'text',
+					success:function(data){
+						alert(data);
+					},
+					error:function(){
+					}
+				});
+			});
+			$("#fabiao").click(function(){
+				alert($("#content").val());
+				$.ajax({
+					url:'fabiao.php',
+					type:'post',
+					data:{"title":$("#title").val(),"content":$("#content").val()},
+					dataType:'html',
+					success:function(data){
+						alert(data);
+					},
+					error:function(){
+					}
+				});
+			});
+			
+			
+		</script>
+	</body>
+</html>
